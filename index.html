@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF1F5; --surface:#FFFFFF; --ink:#18212F; --muted:#6B7788; --line:#E2E8EF;
+  --accent:#0F766E; --accent-soft:#DDF3F0; --accent-ink:#FFFFFF;
+  --high:#D64545; --med:#D98E04; --low:#2F8F5B;
+  --shadow:0 1px 2px rgba(24,33,47,.06),0 8px 28px rgba(24,33,47,.07);
+  --radius:18px;
+}
+:root[data-theme="dark"]{
+  --bg:#0E141C; --surface:#161F2B; --ink:#E8EEF5; --muted:#8C99AB; --line:#25303F;
+  --accent:#2DD4BF; --accent-soft:#12302E; --accent-ink:#06201D;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 28px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  font-family:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;
+  display:flex;justify-content:center;padding:48px 16px 64px;
+  transition:background .25s,color .25s;
+}
+.app{width:100%;max-width:640px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+h1{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.date{color:var(--muted);font-size:.9rem;margin-top:4px}
+.icon-btn{
+  width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:transform .15s,border-color .15s;
+}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:active{transform:scale(.94)}
+svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line)}
+
+.progress{display:flex;align-items:center;gap:18px;padding:20px 22px;margin-bottom:16px}
+.ring{width:64px;height:64px;flex:none;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:7;stroke-linecap:round}
+.ring .track{stroke:var(--line)}
+.ring .bar{stroke:var(--accent);stroke-dasharray:176;stroke-dashoffset:176;transition:stroke-dashoffset .5s ease}
+.ring-wrap{position:relative;flex:none}
+.pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;font-size:.9rem}
+.progress h2{font-size:1.05rem;font-weight:700}
+.progress p{color:var(--muted);font-size:.9rem}
+
+form.add{padding:14px;margin-bottom:16px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text],input[type=date],select{
+  font:inherit;color:var(--ink);background:var(--bg);border:1px solid transparent;
+  border-radius:12px;padding:12px 14px;outline:none;transition:border-color .15s,background .15s;
+}
+input:focus,select:focus{border-color:var(--accent);background:var(--surface)}
+#title{flex:1 1 100%;font-size:1rem}
+#due,#priority{flex:1 1 140px;font-size:.9rem;color-scheme:light dark}
+.btn{
+  font:inherit;font-weight:700;border:0;border-radius:12px;padding:12px 22px;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink);transition:transform .15s,opacity .15s;
+}
+.btn:hover{opacity:.92}.btn:active{transform:scale(.97)}
+
+.toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:2px}
+.tab{
+  font:inherit;font-size:.85rem;font-weight:600;color:var(--muted);background:none;border:0;
+  padding:7px 14px;border-radius:9px;cursor:pointer;transition:background .15s,color .15s;
+}
+.tab[aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+#search{flex:1 1 160px;max-width:240px;font-size:.88rem;padding:9px 14px;background:var(--surface);border-color:var(--line)}
+
+ul{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px}
+li.task{
+  display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;border-left:4px solid var(--p,var(--line));
+  animation:in .25s ease;
+}
+@keyframes in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+li.task.high{--p:var(--high)}li.task.medium{--p:var(--med)}li.task.low{--p:var(--low)}
+.check{
+  appearance:none;width:24px;height:24px;flex:none;border-radius:50%;border:2px solid var(--muted);
+  cursor:pointer;display:grid;place-items:center;transition:all .15s;background:transparent;
+}
+.check:hover{border-color:var(--accent)}
+.check:checked{background:var(--accent);border-color:var(--accent)}
+.check:checked::after{
+  content:"";width:6px;height:11px;border:solid var(--accent-ink);border-width:0 2.5px 2.5px 0;
+  transform:rotate(45deg) translate(-1px,-1px);
+}
+.body{flex:1;min-width:0}
+.name{font-weight:600;overflow-wrap:anywhere;cursor:text}
+.meta{font-size:.78rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+.meta .overdue{color:var(--high);font-weight:600}
+li.done .name{text-decoration:line-through;color:var(--muted)}
+li.done{opacity:.75}
+.edit{width:100%;font-weight:600;padding:6px 10px;border-color:var(--accent);background:var(--surface)}
+.del{
+  background:none;border:0;color:var(--muted);cursor:pointer;width:34px;height:34px;border-radius:10px;
+  display:grid;place-items:center;flex:none;transition:background .15s,color .15s;
+}
+.del:hover{background:rgba(214,69,69,.12);color:var(--high)}
+.del svg{width:18px;height:18px}
+
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:4px}
+
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:16px;color:var(--muted);font-size:.85rem}
+.link{font:inherit;background:none;border:0;color:var(--muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.link:hover{color:var(--high)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:480px){body{padding-top:28px}h1{font-size:1.6rem}#search{max-width:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <div>
+      <h1>My List</h1>
+      <div class="date" id="today"></div>
+    </div>
+    <button class="icon-btn" id="theme" aria-label="Switch between light and dark mode" title="Switch theme">
+      <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </header>
+
+  <section class="card progress" aria-live="polite">
+    <div class="ring-wrap">
+      <svg class="ring" viewBox="0 0 64 64"><circle class="track" cx="32" cy="32" r="28"/><circle class="bar" id="bar" cx="32" cy="32" r="28"/></svg>
+      <div class="pct" id="pct">0%</div>
+    </div>
+    <div>
+      <h2 id="pTitle">Nothing yet</h2>
+      <p id="pSub">Add your first task below.</p>
+    </div>
+  </section>
+
+  <form class="card add" id="form" autocomplete="off">
+    <div class="row">
+      <input type="text" id="title" placeholder="What needs to get done?" aria-label="Task title" maxlength="200" required>
+    </div>
+    <div class="row">
+      <select id="priority" aria-label="Priority">
+        <option value="low">Low priority</option>
+        <option value="medium" selected>Medium priority</option>
+        <option value="high">High priority</option>
+      </select>
+      <input type="date" id="due" aria-label="Due date">
+      <button class="btn" type="submit">Add task</button>
+    </div>
+  </form>
+
+  <div class="toolbar">
+    <div class="tabs" role="group" aria-label="Filter tasks">
+      <button class="tab" data-f="all" aria-pressed="true">All</button>
+      <button class="tab" data-f="active" aria-pressed="false">Active</button>
+      <button class="tab" data-f="done" aria-pressed="false">Done</button>
+    </div>
+    <input type="text" id="search" placeholder="Search tasks" aria-label="Search tasks">
+  </div>
+
+  <ul id="list"></ul>
+
+  <footer>
+    <span id="count"></span>
+    <button class="link" id="clear">Clear completed</button>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var KEY = "my-list.tasks.v1", THEME = "my-list.theme";
+  var tasks = load(), filter = "all", query = "";
+  var $ = function(id){return document.getElementById(id)};
+  var list = $("list");
+
+  function load(){
+    try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch(e){ return []; }
+  }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch(e){}
+  }
+
+  // Theme
+  var saved = null; try { saved = localStorage.getItem(THEME); } catch(e){}
+  var dark = saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  function applyTheme(){
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+  }
+  applyTheme();
+  $("theme").onclick = function(){
+    dark = !dark; applyTheme();
+    try { localStorage.setItem(THEME, dark ? "dark" : "light"); } catch(e){}
+  };
+
+  $("today").textContent = new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"});
+
+  function todayStr(){
+    var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0,10);
+  }
+  function fmtDue(s){
+    var d = new Date(s + "T00:00:00");
+    return d.toLocaleDateString(undefined,{day:"numeric",month:"short"});
+  }
+
+  function add(e){
+    e.preventDefault();
+    var t = $("title").value.trim();
+    if(!t) return;
+    tasks.unshift({id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),title:t,
+      priority:$("priority").value,due:$("due").value,done:false});
+    $("title").value = ""; $("due").value = "";
+    save(); render(); $("title").focus();
+  }
+  $("form").addEventListener("submit", add);
+
+  document.querySelectorAll(".tab").forEach(function(b){
+    b.onclick = function(){
+      filter = b.dataset.f;
+      document.querySelectorAll(".tab").forEach(function(x){x.setAttribute("aria-pressed", x === b)});
+      render();
+    };
+  });
+  $("search").oninput = function(e){ query = e.target.value.toLowerCase(); render(); };
+  $("clear").onclick = function(){
+    tasks = tasks.filter(function(t){return !t.done}); save(); render();
+  };
+
+  function startEdit(task, nameEl){
+    var input = document.createElement("input");
+    input.type = "text"; input.className = "edit"; input.value = task.title; input.maxLength = 200;
+    nameEl.replaceWith(input); input.focus(); input.select();
+    var finished = false;
+    function commit(ok){
+      if(finished) return; finished = true;
+      var v = input.value.trim();
+      if(ok && v) task.title = v;
+      save(); render();
+    }
+    input.onblur = function(){commit(true)};
+    input.onkeydown = function(e){
+      if(e.key === "Enter") commit(true);
+      if(e.key === "Escape") commit(false);
+    };
+  }
+
+  function render(){
+    var today = todayStr();
+    var rank = {high:0, medium:1, low:2};
+    var shown = tasks.filter(function(t){
+      if(filter === "active" && t.done) return false;
+      if(filter === "done" && !t.done) return false;
+      return !query || t.title.toLowerCase().indexOf(query) > -1;
+    }).sort(function(a,b){
+      if(a.done !== b.done) return a.done - b.done;
+      return rank[a.priority] - rank[b.priority];
+    });
+
+    list.innerHTML = "";
+    if(!shown.length){
+      var li = document.createElement("li");
+      li.className = "empty";
+      li.innerHTML = tasks.length
+        ? "<strong>No matching tasks</strong>Try a different filter or search."
+        : "<strong>Your list is empty</strong>Type a task above and press Add task.";
+      list.appendChild(li);
+    }
+    shown.forEach(function(t){
+      var li = document.createElement("li");
+      li.className = "task " + t.priority + (t.done ? " done" : "");
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox"; cb.className = "check"; cb.checked = t.done;
+      cb.setAttribute("aria-label", "Mark \"" + t.title + "\" as " + (t.done ? "not done" : "done"));
+      cb.onchange = function(){ t.done = cb.checked; save(); render(); };
+
+      var body = document.createElement("div"); body.className = "body";
+      var name = document.createElement("div"); name.className = "name";
+      name.textContent = t.title; name.title = "Double-click to edit";
+      name.ondblclick = function(){ startEdit(t, name); };
+      var meta = document.createElement("div"); meta.className = "meta";
+      var pr = document.createElement("span");
+      pr.textContent = t.priority.charAt(0).toUpperCase() + t.priority.slice(1) + " priority";
+      meta.appendChild(pr);
+      if(t.due){
+        var d = document.createElement("span");
+        var late = !t.done && t.due < today;
+        d.textContent = (late ? "Overdue · " : "Due ") + fmtDue(t.due);
+        if(late) d.className = "overdue";
+        meta.appendChild(d);
+      }
+      body.appendChild(name); body.appendChild(meta);
+
+      var del = document.createElement("button");
+      del.className = "del"; del.setAttribute("aria-label", "Delete \"" + t.title + "\"");
+      del.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+      del.onclick = function(){
+        tasks = tasks.filter(function(x){return x.id !== t.id}); save(); render();
+      };
+
+      li.appendChild(cb); li.appendChild(body); li.appendChild(del);
+      list.appendChild(li);
+    });
+
+    // progress + footer
+    var total = tasks.length, done = tasks.filter(function(t){return t.done}).length;
+    var pct = total ? Math.round(done / total * 100) : 0;
+    $("pct").textContent = pct + "%";
+    $("bar").style.strokeDashoffset = 176 - (176 * pct / 100);
+    $("pTitle").textContent = !total ? "Nothing yet" : done === total ? "All done" : (total - done) + " left to do";
+    $("pSub").textContent = !total ? "Add your first task below." : done + " of " + total + " completed";
+    $("count").textContent = (total - done) + (total - done === 1 ? " task" : " tasks") + " remaining";
+    $("clear").style.visibility = done ? "visible" : "hidden";
+  }
+  render();
+})();
+</script>
+</body>
+</html>
